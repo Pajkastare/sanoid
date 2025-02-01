@@ -23,7 +23,7 @@ my $pvoptions = "-p -t -e -r -b";
 my %args = ('sshconfig' => '', 'sshkey' => '', 'sshport' => '', 'sshcipher' => '', 'sshoption' => [], 'target-bwlimit' => '', 'source-bwlimit' => '');
 GetOptions(\%args, "no-command-checks", "monitor-version", "compress=s", "dumpsnaps", "recursive|r", "sendoptions=s", "recvoptions=s",
                    "source-bwlimit=s", "target-bwlimit=s", "sshconfig=s", "sshkey=s", "sshport=i", "sshcipher|c=s", "sshoption|o=s@",
-                   "debug", "quiet", "no-stream", "no-sync-snap", "no-resume", "exclude=s@", "skip-parent", "identifier=s",
+                   "sshforcepty", "debug", "quiet", "no-stream", "no-sync-snap", "no-resume", "exclude=s@", "skip-parent", "identifier=s",
                    "no-clone-handling", "no-privilege-elevation", "force-delete", "no-rollback", "create-bookmark", "use-hold",
                    "pv-options=s" => \$pvoptions, "keep-sync-snap", "preserve-recordsize", "mbuffer-size=s" => \$mbuffer_size,
                    "delete-target-snapshots", "insecure-direct-connection=s", "preserve-properties",
@@ -104,6 +104,11 @@ $ENV{'PATH'} = $ENV{'PATH'} . ":/bin:/usr/bin:/sbin";
 my $zfscmd = 'zfs';
 my $zpoolcmd = 'zpool';
 my $sshcmd = 'ssh';
+if (defined $args{'sshforcepty'}) {
+        $sshcmd = "$sshcmd -t";
+	writelog('DEBUG', "forcing SSH pseudo-terminal");
+}
+
 my $pscmd = 'ps';
 
 my $pvcmd = 'pv';
@@ -2348,6 +2353,7 @@ Options:
   --sshport=PORT        Connects to remote on a particular port
   --sshcipher|c=CIPHER  Passes CIPHER to ssh to use a particular cipher set
   --sshoption|o=OPTION  Passes OPTION to ssh for remote usage. Can be specified multiple times
+  --sshforcepty         Forces SSH to allocate a pseudo-terminal, usually not required (see ssh(1) man page)
   --insecure-direct-connection=IP:PORT[,IP:PORT]  WARNING: DATA IS NOT ENCRYPTED. First address pair is for connecting to the target and the second for listening at the target
 
   --help                Prints this helptext
